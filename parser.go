@@ -36,21 +36,24 @@ type Result struct {
 // Add a link to the queue.
 func addQueueLink(httplink, media, referer string, depth int) {
 	if maxDepth != -1 && depth > maxDepth {
-		return
+		// enforce HEAD - prevent from being processed as HTML/CSS
+		media = "file"
 	}
 
+	// check if we have processed this already
 	_, found := processed[httplink]
 	if found {
+		// add to referrers
 		processed[httplink] = append(processed[httplink], referer)
 	} else {
-		// quick and dirty file detection to enforce HEAD for linked files
+		// enforce HEAD - prevent from being processed as HTML/CSS
 		if media == "html" && fileRegex.MatchString(httplink) {
 			media = "file"
 		}
 
 		linksProcessed++
 
-		// Progress report
+		// progress report
 		fmt.Printf("\033[2K\r#%-3d (%d errors) %s", linksProcessed, errorsProcessed, truncateString(httplink, 100))
 
 		if referer == "" {
@@ -68,9 +71,7 @@ func addQueueLink(httplink, media, referer string, depth int) {
 				linksProcessed--
 				return
 			}
-		} else if media == "css" {
-			fetchAndParse(httplink, media, depth)
-		} else if media == "html" {
+		} else if media == "css" || media == "html" {
 			fetchAndParse(httplink, media, depth)
 		} else {
 			head(httplink)
@@ -113,7 +114,6 @@ func fetchAndParse(httplink, media string, depth int) {
 
 	if res.StatusCode != 200 {
 		errorsProcessed++
-		// output.Errors = append(output.Errors, fmt.Sprintf("%s returned a status %d", httplink, res.StatusCode))
 		results = append(results, output)
 		return
 	}
