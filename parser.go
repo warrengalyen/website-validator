@@ -3,17 +3,19 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
-	"github.com/gorilla/css/scanner"
 	"io/ioutil"
 	"net/http"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/gorilla/css/scanner"
 )
 
 var (
-	processed = make(map[string][]string)
+	processed = make(map[string]int) // 1 = HEAD, 2 = GET
+	referrers = make(map[string][]string)
 	fileRegex = regexp.MustCompile(`(?i)\.(jpe?g|png|gif|svg|ico|pdf|docx?|xlsx?|zip|gz|bz2|tar|xz)$`)
 	urlRegex  = regexp.MustCompile(`url\((.*)\)`)
 )
@@ -34,32 +36,36 @@ type Result struct {
 }
 
 // Add a link to the queue.
-func addQueueLink(httplink, media, referer string, depth int) {
+func addQueueLink(httplink, action, referer string, depth int) {
 	if maxDepth != -1 && depth > maxDepth {
-		// enforce HEAD - prevent from being processed as HTML/CSS
-		media = "file"
+		// prevent further parsing by simply doing a HEAD
+		action = "head"
 	}
 
 	// check if we have processed this already
-	_, found := processed[httplink]
-	if found {
+	processType, found := processed[httplink]
+	if found && processType >= actionWeight(action) {
 		// add to referrers
-		processed[httplink] = append(processed[httplink], referer)
+		if referer != httplink && !stringInSlice(referer, referrers[httplink]) {
+			referrers[httplink] = append(referrers[httplink], referer)
+		}
 	} else {
-		// enforce HEAD - prevent from being processed as HTML/CSS
-		if media == "html" && fileRegex.MatchString(httplink) {
-			media = "file"
+		// enforce HEAD - prevent from being procesed as HTML / CSS
+		if action == "parse" && fileRegex.MatchString(httplink) {
+			action = "head"
 		}
 
 		linksProcessed++
+		processed[httplink] = actionWeight(action)
 
 		// progress report
 		fmt.Printf("\033[2K\r#%-3d (%d errors) %s", linksProcessed, errorsProcessed, truncateString(httplink, 100))
 
 		if referer == "" {
-			processed[httplink] = []string{}
-		} else {
-			processed[httplink] = []string{referer}
+			// initiate empty slice
+			referrers[httplink] = []string{}
+		} else if referer != httplink {
+			referrers[httplink] = []string{referer}
 		}
 
 		isExternal := baseDomain != "" && getHost(httplink) != baseDomain
@@ -71,18 +77,19 @@ func addQueueLink(httplink, media, referer string, depth int) {
 				linksProcessed--
 				return
 			}
-		} else if media == "css" || media == "html" {
-			fetchAndParse(httplink, media, depth)
+		} else if action == "parse" {
+			fetchAndParse(httplink, action, depth)
 		} else {
 			head(httplink)
 		}
 	}
 }
 
-func fetchAndParse(httplink, media string, depth int) {
+// FetchAndParse will action a remove file, and
+func fetchAndParse(httplink, action string, depth int) {
 	output := Result{}
 	output.URL = httplink
-	output.Type = media
+	output.Type = action
 
 	timeout := time.Duration(10 * time.Second)
 
@@ -157,25 +164,6 @@ func fetchAndParse(httplink, media string, depth int) {
 			}
 		})
 
-		// LINKS
-		doc.Find("a").Each(func(i int, s *goquery.Selection) {
-			if link, ok := s.Attr("href"); ok {
-				full, err := absoluteURL(link, baseLink, true)
-				if err != nil {
-					return
-				}
-
-				isExternal := baseDomain != "" && getHost(full) != baseDomain
-
-				if isExternal {
-					addQueueLink(full, "html", baseLink, depth)
-				} else {
-					// simple image detection
-					addQueueLink(full, "html", baseLink, depth+1)
-				}
-			}
-		})
-
 		// IMAGES/VIDEOS/AUDIO/IFRAME
 		doc.Find("img,embed,source,iframe").Each(func(i int, s *goquery.Selection) {
 			if link, ok := s.Attr("src"); ok {
@@ -188,10 +176,10 @@ func fetchAndParse(httplink, media string, depth int) {
 					errorsProcessed++
 					output.Errors = append(output.Errors, fmt.Sprintf("Downgraded prototol to image: %s", full))
 				}
-				fileType := "file"
+				fileType := "head"
 				// parse iframes as html
 				if goquery.NodeName(s) == "iframe" {
-					fileType = "html"
+					fileType = "parse"
 				}
 				addQueueLink(full, fileType, baseLink, depth)
 			}
@@ -209,7 +197,7 @@ func fetchAndParse(httplink, media string, depth int) {
 					errorsProcessed++
 					output.Errors = append(output.Errors, fmt.Sprintf("Downgraded prototol to CSS stylesheet: %s", full))
 				}
-				addQueueLink(full, "css", baseLink, depth)
+				addQueueLink(full, "parse", baseLink, depth)
 			}
 		})
 
@@ -225,7 +213,7 @@ func fetchAndParse(httplink, media string, depth int) {
 					errorsProcessed++
 					output.Errors = append(output.Errors, fmt.Sprintf("Downgraded prototol to JS: %s", full))
 				}
-				addQueueLink(full, "js", baseLink, depth)
+				addQueueLink(full, "head", baseLink, depth)
 			}
 		})
 
@@ -241,7 +229,25 @@ func fetchAndParse(httplink, media string, depth int) {
 					errorsProcessed++
 					output.Errors = append(output.Errors, fmt.Sprintf("Downgraded prototol to favicon: %s", full))
 				}
-				addQueueLink(full, "file", baseLink, depth)
+				addQueueLink(full, "head", baseLink, depth)
+			}
+		})
+
+		// LINKS
+		doc.Find("a").Each(func(i int, s *goquery.Selection) {
+			if link, ok := s.Attr("href"); ok {
+				full, err := absoluteURL(link, baseLink, true)
+				if err != nil {
+					return
+				}
+
+				isExternal := baseDomain != "" && getHost(full) != baseDomain
+
+				if isExternal {
+					addQueueLink(full, "head", baseLink, depth)
+				} else {
+					addQueueLink(full, "parse", baseLink, depth+1)
+				}
 			}
 		})
 	}
@@ -278,7 +284,7 @@ func fetchAndParse(httplink, media string, depth int) {
 						errorsProcessed++
 						output.Errors = append(output.Errors, fmt.Sprintf("Downgraded prototol to CSS asset: %s", full))
 					}
-					addQueueLink(full, "file", httplink, depth)
+					addQueueLink(full, "head", httplink, depth)
 				}
 			}
 		}
