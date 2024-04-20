@@ -9,7 +9,7 @@ and verify external links.
 - Check a single URL, to a certain depth, or an entire website
 - HTML & CSS validation using (default) the [Nu Html Checker](https://validator.w3.org/)
 - Detect & checks linked assets from HTML & CSS (CSS, favicons, images, videos, etc)
-- Detect protocol downgrading (HTTPS => HTTP) for linked assets (images, CSS, JS etc)
+- Detect mixed content (HTTPS => HTTP) for linked assets (images, CSS, JS etc)
 - Verify links to external sites
 - Summary report of errors
 
