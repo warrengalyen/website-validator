@@ -1,4 +1,4 @@
-# Website-validator - Validate website HTML & CSS, check links & resources
+# Validate website HTML & CSS, check links & resources
 
 A command-line website validator for Linux, Mac & Windows, which can spider through a website,
 validating all HTML & CSS against W3C spec, check the existence of all assets (images, css, fonts, etc),
@@ -8,10 +8,10 @@ and verify external links.
 
 - Check a single URL, to a certain depth, or an entire website
 - HTML & CSS validation using (default) the [Nu Html Checker](https://validator.w3.org/)
-- Detect & checks linked assets from HTML & CSS (CSS, favicons, images, videos, etc)
-- Detect mixed content (HTTPS => HTTP) for linked assets (images, CSS, JS etc)
+- Detect & checks linked assets from HTML & linked CSS (fonts, favicons, images, videos, etc)
+- Detect mixed content (HTTPS => HTTP) for linked assets (fonts, images, CSS, JS etc)
 - Verify links to external sites
-- Summary report of errors
+- Summary report of errors (and optionally warnings)
 
 ## Usage options
 
@@ -31,7 +31,7 @@ Options:
   -v, --version            show app version
 ```
 ## Examples
-- `website-validator https://example.com/` - scan just this URL, verify all direct assets & links
+- `website-validator https://example.com/` - scan URL, verify all direct assets & links
 - `website-validator https://example.com/ --css --html` - scan URL, verify all direct assets & links, validate HTML & CSS
 - `website-validator https://example.com/ -a` - scan entire site, verify assets & links
 - `website-validator https://example.com/ --css --html -d 2` - scan site to a depth of 2 internal links, verify assets & links, validate HTML and CSS
