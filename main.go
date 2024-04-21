@@ -95,8 +95,6 @@ func main() {
 		os.Exit(2)
 	}
 
-	start := time.Now()
-
 	if htmlValidator != "" {
 		u, err := url.Parse(htmlValidator)
 		if err != nil {
@@ -124,6 +122,14 @@ func main() {
 	if allLinks {
 		maxDepth = -1
 	}
+
+	u, err := url.Parse(args[0])
+	if err != nil || u.Host == "" {
+		fmt.Printf("Please use a full URL: %s\n", args[0])
+		os.Exit(2)
+	}
+
+	start := time.Now()
 
 	addQueueLink(args[0], "parse", "", 0)
 
