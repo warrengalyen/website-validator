@@ -8,6 +8,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -150,7 +151,11 @@ func main() {
 
 	start := time.Now()
 
-	addQueueLink(args[0], "parse", "", 0)
+	var wg sync.WaitGroup
+
+	addQueueLink(args[0], "parse", "", 0, &wg)
+
+	wg.Wait()
 
 	elapsed := time.Since(start)
 
