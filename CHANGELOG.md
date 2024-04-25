@@ -1,5 +1,9 @@
 # Changelog
 
+## [dev]
+
+- Add timeout configuration
+
 ## [0.0.5]
 
 - Add google to ignored links as they almost always redirect to login pages
