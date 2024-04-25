@@ -11,7 +11,7 @@ and verify outbound links.
 - Detect & checks linked assets from HTML & linked CSS (fonts, favicons, images, videos, etc)
 - Detect mixed content (HTTPS => HTTP) for linked assets (fonts, images, CSS, JS etc)
 - Verify outbound links (to external websites)
-- Summary report of errors (and optionally warnings)
+- Summary report or errors (& optionally HTML/CSS warnings)
 
 ## Usage options
 
@@ -28,6 +28,7 @@ Options:
   -r, --redirects          display redirects
   -w, --warnings           display validation warnings (default errors only)
   -f, --full               full scan (same as "-a -r -o --html --css")
+  -t, --timeout int        timeout in seconds (default 10)
       --validator string   Nu Html validator (default "https://validator.w3.org/nu/")
   -u, --update             update to latest release
   -v, --version            show app version
@@ -37,7 +38,7 @@ Options:
 - `website-validator https://example.com/ --css --html` - scan URL, verify all direct assets & links, validate HTML & CSS
 - `website-validator https://example.com/ -a` - scan entire site, verify assets & links
 - `website-validator https://example.com/ --css --html -d 2` - scan site to a depth of 2 internal links, verify assets & links, validate HTML and CSS
-- `website-validator https://example.com/ -e` - scan entire site, verify all assets, verify outbound links
+- `website-validator https://example.com/ -a -o` - scan entire site, verify all assets, verify outbound links
 - `website-validator https://example.com/ -f` - scan entire site, verify all assets, verify outbound links, validate HTML & CSS
 
 ## Installing
