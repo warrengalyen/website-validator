@@ -5,7 +5,6 @@ go 1.23
 require (
 	github.com/PuerkitoBio/goquery v1.9.1
 	github.com/axllent/ghru v1.2.1
-	github.com/gorilla/css v1.0.1
 	github.com/spf13/pflag v1.0.5
 )
 
