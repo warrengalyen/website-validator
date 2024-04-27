@@ -1,10 +1,11 @@
 module website-validator
 
-go 1.23
+go 1.20
 
 require (
 	github.com/PuerkitoBio/goquery v1.9.1
 	github.com/axllent/ghru v1.2.1
+	github.com/lukasbob/srcset v0.0.0-20231122134231-06e7f27b6370
 	github.com/spf13/pflag v1.0.5
 )
 
