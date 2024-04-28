@@ -24,6 +24,7 @@ var (
 	allLinks         bool
 	fullScan         bool
 	redirectWarnings bool
+	noRobots         bool
 	htmlValidator    = "https://validator.w3.org/nu/"
 	timeTaken        float64
 	update           bool
@@ -60,6 +61,7 @@ func main() {
 	flag.BoolVar(&validateHTML, "html", false, "validate HTML")
 	flag.BoolVar(&validateCSS, "css", false, "validate CSS")
 	flag.StringVarP(&ignoreURLs, "ignore", "i", "", "ignore URLs, comma-separated, wildcards allowed (*.jpg,example.com)")
+	flag.BoolVarP(&noRobots, "no-robots", "n", false, "ignore robots.txt (if exists)")
 	flag.BoolVarP(&redirectWarnings, "redirects", "r", false, "treat redirects as errors")
 	flag.BoolVarP(&showWarnings, "warnings", "w", false, "display validation warnings (default errors only)")
 	flag.BoolVarP(&fullScan, "full", "f", false, "full scan (same as \"-a -r -o --html --css\")")
@@ -154,6 +156,8 @@ func main() {
 		fmt.Printf("Please use a full URL: %s\n", args[0])
 		os.Exit(2)
 	}
+
+	initRobotsTxt(args[0])
 
 	threads = make(chan int, nrThreads)
 

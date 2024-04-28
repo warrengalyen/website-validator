@@ -1,6 +1,6 @@
 module website-validator
 
-go 1.20
+go 1.22
 
 require (
 	github.com/PuerkitoBio/goquery v1.9.1
@@ -12,5 +12,7 @@ require (
 require (
 	github.com/andybalholm/cascadia v1.3.2 // indirect
 	github.com/axllent/semver v0.0.1 // indirect
+	github.com/samclarke/robotstxt v0.0.0-20171127213916-2817654b7988 // indirect
 	golang.org/x/net v0.21.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 )

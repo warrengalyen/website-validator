@@ -12,6 +12,7 @@ and verify outbound links.
 - Detect mixed content (HTTPS => HTTP) for linked assets (fonts, images, CSS, JS etc)
 - Verify outbound links (to external websites)
 - Summary report or errors (& optionally HTML/CSS warnings)
+- Obeys `robots.txt` (can be ignored)
 
 ## Usage options
 
@@ -25,6 +26,7 @@ Options:
       --html               validate HTML
       --css                validate CSS
   -i, --ignore string      ignore URLs, comma-separated, wildcards allowed (*.jpg,example.com)
+  -n, --no-robots          ignore robots.txt (if exists)
   -r, --redirects          treat redirects as errors
   -w, --warnings           display validation warnings (default errors only)
   -f, --full               full scan (same as "-a -r -o --html --css")
@@ -45,3 +47,12 @@ Options:
 ## Installing
 Download the [latest binary release](https://github.com/warrengalyen/website-validator/releases/latest) for your system,
 or build from source `go get -u github.com/warrengalyen/website-validator`(go >= 1.23 required)
+
+### Robots.txt
+
+By default, website-validator obeys `Disallow` rules in `robots.txt` if it exists. You can optionally skip this by adding `-n` to your runtime flags. To add specific rules for just the validator, you can target it specifically with `User-agent: website-validator`, eg:
+
+```
+User-agent: website-validator
+Disallow: /assets/Products/*
+```
