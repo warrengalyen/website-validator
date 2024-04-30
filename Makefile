@@ -1,5 +1,5 @@
-TAG=`git describe --tags`
-VERSION ?= `[ -d ".git" ] && git describe --tags || echo "0.0.0"`
+TAG=`git describe --tags --abbrev=0`
+VERSION ?= `[ -d ".git" ] && git describe --tags --abbrev=0 || echo "0.0.0"`
 LDFLAGS=-ldflags "-s -w -X main.appVersion=${VERSION}"
 BINARY="website-validator"
 
@@ -22,6 +22,4 @@ release:
 	$(call build,linux,arm)
 	$(call build,linux,arm64)
 	$(call build,darwin,amd64)
-	$(call build,darwin,386)
-	$(call build,windows,386)
 	$(call build,windows,amd64)
