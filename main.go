@@ -34,7 +34,7 @@ var (
 	timeoutSeconds   int
 	threads          chan int
 	appVersion       = "dev"
-	userAgent        = "Website-validator"
+	userAgent        = "website-validator"
 	linksProcessed   = 0
 	errorsProcessed  = 0
 )
@@ -44,7 +44,7 @@ func main() {
 	showHelp := false
 	var nrThreads int
 
-	userAgent = fmt.Sprintf("Web-validator/%s", appVersion)
+	userAgent = fmt.Sprintf("website-validator/%s", appVersion)
 
 	flag := pflag.NewFlagSet(os.Args[0], pflag.ExitOnError)
 
