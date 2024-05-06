@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/pflag"
 	"net/url"
 	"os"
+	"os/signal"
 	"regexp"
 	"strings"
 	"sync"
@@ -166,6 +167,21 @@ func main() {
 	var wg sync.WaitGroup
 
 	addQueueLink(args[0], "parse", "", 0, &wg)
+
+	// display results if process is cancelled (ctrl-c)
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		for range c {
+			elapsed := time.Since(start)
+
+			timeTaken = elapsed.Round(time.Second).Seconds()
+			fmt.Println("")
+			fmt.Println("Process interrupted")
+			displayReport(results)
+			os.Exit(1)
+		}
+	}()
 
 	wg.Wait()
 
