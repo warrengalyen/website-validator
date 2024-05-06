@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.0.9]
+
+- Display results if process is cancelled (ctrl-c)
+
 ## [0.0.8]
 
 - Bugfix for scheme relative links
