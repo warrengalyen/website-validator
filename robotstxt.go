@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/samclarke/robotstxt"
+	"github.com/jimsmart/grobotstxt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	robots *robotstxt.RobotsTxt
+	robotsContent string
 )
 
 // Setup robots.txt exclusions if allowed and exists
@@ -60,11 +60,7 @@ func initRobotsTxt(startURL string) {
 		return
 	}
 
-	robots, err = robotstxt.Parse(string(body), robotsURL)
-	if err != nil {
-		noRobots = true
-		return
-	}
+	robotsContent = string(body)
 }
 
 // Test if allowed in robots.txt
@@ -77,7 +73,5 @@ func robotsAllowed(url string) bool {
 		return true
 	}
 
-	allowed, _ := robots.IsAllowed("website-validator", url)
-
-	return allowed
+	return grobotstxt.AgentAllowed(robotsContent, "web-validator", url)
 }
